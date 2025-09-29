@@ -37,7 +37,6 @@ void test2()
 }
 
 //孤儿进程 父进程先退了，子进程被init进程收养
-
 void test3()
 {
     pid_t pid = fork();
@@ -59,6 +58,15 @@ void test3()
         }
 
     }
+}
+
+//阻塞进程
+void test4()
+{
+    int x;
+    scanf("%d", &x); //阻塞等待输入
+    std::cout << "I am process, pid = " << getpid() << std::endl;
+    sleep(1);
 }
 
 int main()
