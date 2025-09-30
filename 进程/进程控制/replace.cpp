@@ -8,7 +8,6 @@ int main()
 {
     printf("testexec...begin\n");
 
-    //execlp("python3", "python3", "replace.py", nullptr);
-    execl("./replace.py", nullptr);
+    execlp("python3", "python3", "replace.py", nullptr);;
     printf("testexec...end\n");
 }

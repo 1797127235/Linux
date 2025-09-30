@@ -4,6 +4,7 @@
 
 int g_val = 100;
 
+//子进程改变变量，发现地址一样  虚拟地址
 int main()
 {
     printf("father is running ,pid: %d, ppid: %d\n", getpid(), getppid());
@@ -18,12 +19,12 @@ int main()
             if(cnt == 5)
             {
                 g_val = 200;
-            }
+            }              
             cnt ++;
         }
     }
     else
-    {
+    { 
         while(1)
         {
             printf("i am father process, pid: %d, ppid: %d, g_val: %d, &g_val: %p\n", getpid(), getppid(), g_val, (void*)&g_val);
@@ -31,6 +32,5 @@ int main()
             // g_val++;
         }
     }
-
     return 0;
 }

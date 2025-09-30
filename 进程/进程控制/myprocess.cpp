@@ -2,9 +2,10 @@
 #include<cstdlib>
 #include<unistd.h>
 
+
 int main()
 {
-    printf("myprocess is running ,pid: %d, ppid: %d\n", getpid(), getppid());
-    sleep(5);
-    return 100;
+    int n;
+    printf("pid = %d\n", getpid());
+    scanf("%d", &n);
 }
