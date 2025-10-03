@@ -81,10 +81,18 @@ void CreateChannelAndSub(std::vector<Channel>* channels,int num,task_t task)
             exit(1);
         }
 
+
         pid_t id = fork();
 
         if(id == 0)
         {
+            if(!channels->empty())
+            {
+                for(auto& channel : *channels)
+                {
+                    channel.CloseChannel(); //关闭历史上的写端 保证每个管道只有一个写端一个读端
+                }
+            }
             close(pipefd[1]);
             dup2(pipefd[0],0);
             // work();
@@ -97,7 +105,6 @@ void CreateChannelAndSub(std::vector<Channel>* channels,int num,task_t task)
         channels->emplace_back(pipefd[1],id,"subprocess_" + std::to_string(i));
         close(pipefd[1]); 
     }
-
 
 }
 
