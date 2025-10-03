@@ -10,7 +10,9 @@ int main()
     {
         while(1)
         {
-            printf("i am father process, pid: %d, ppid: %d\n", getpid(), getppid());
+            // printf("i am father process, pid: %d, ppid: %d\n", getpid(), getppid());
+            // sleep(1);
+            printf("i am father process %d", getpid());
             sleep(1);
         }
     }
@@ -19,6 +21,7 @@ int main()
         while(1)
         {
             printf("i am child process, pid: %d, ppid: %d\n", getpid(), getppid());
+            fsync(stdout->_fileno);
             sleep(1);
         }
     }
