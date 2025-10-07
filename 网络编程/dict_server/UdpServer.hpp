@@ -6,10 +6,13 @@
 #include<string.h>
 #include<sys/types.h>
 #include<netinet/in.h>
+#include<functional>
 #include"noCopy.hpp"
 #include"Log.hpp"
 #include"InetAddr.hpp"
 using namespace log_ns;
+
+using func_t = std::function<std::string(const std::string&)>;
 
 class UdpServer:public noCopy
 {
@@ -17,7 +20,8 @@ public:
     UdpServer(uint16_t port):
         _sockfd(-1),
         _port(port),
-        _isrunning(false)
+        _isrunning(false),
+        _func(nullptr)
     {
         _sockfd = ::socket(AF_INET,SOCK_DGRAM,0);
         if(_sockfd < 0)
@@ -38,8 +42,18 @@ public:
         }
     }
 
+    void SetMessageCallback(func_t func)
+    {
+        _func = func;
+    }   
+
     void Start()
     {
+        if(_func == nullptr)
+        {
+            std::cerr << "must set message callback first" << std::endl;
+            return;
+        }
         _isrunning = true;
         while(_isrunning)
         {
@@ -51,11 +65,11 @@ public:
             {
                 buffer[n] = '\0';
                 InetAddr inetaddr(peer);
-                uint16_t peerport = inetaddr.Port();
-                std:: string peerip = inetaddr.Ip();
-                std::string msg = "client# " + peerip + ":" + std::to_string(peerport) + " say# " + buffer;
-                std::cout << msg << std::endl;
-                sendto(_sockfd,buffer,strlen(buffer),0,(struct sockaddr*)&peer,len);
+                std::string msg = buffer;
+
+                std::string response = _func(msg); //业务处理
+                
+                sendto(_sockfd,response.c_str(),response.size(),0,(struct sockaddr*)&peer,len);
             }
         }
     }
@@ -74,4 +88,5 @@ private:
     int _sockfd;
     uint16_t _port;
     bool _isrunning;
+    func_t _func; //业务处理函数
 };
