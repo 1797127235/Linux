@@ -2,6 +2,7 @@
 #include<string>
 #include<fstream>
 #include<iostream>
+#include<sstream>
 
 const char sep = ':';
 class Dict
@@ -43,7 +44,6 @@ public:
         fin.close();
         return true;
     }
-
 
     std::string translate(const std::string& word) const
     {
