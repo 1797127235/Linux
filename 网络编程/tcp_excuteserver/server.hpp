@@ -9,20 +9,22 @@
 #include<functional>
 #include<memory>
 #include<thread>
+#include<iostream>
 #include"Log.hpp"
 #include"InetAddr.hpp"
-#include"ThreadPool.hpp"
-#include"Lockguard.hpp"
+#include "Command.hpp"
 
 using namespace log_ns;
 
+using task_t = std::function<void(const char*, int)>;
 class TcpServer
 {
 public:
     TcpServer(uint16_t port = 8888):
         _listensock(-1),
         _port(port),
-        _isrunning(false)
+        _isrunning(false),
+        _task(nullptr)
     {
         _listensock = socket(AF_INET,SOCK_STREAM,0);
         if(_listensock < 0)
@@ -58,23 +60,30 @@ public:
         {
             char buffer[1024];
             int n = ::read(clientfd,buffer,sizeof(buffer) - 1);
-            LOG(INFO,"read %d bytes from %s:%d\n",n,peer.Ip().c_str(),peer.Port());
             if(n <= 0)
             {
                 break;
             }
-
             buffer[n] = 0;
-            int m = ::write(clientfd,buffer,n);
-            if(m <= 0)
-            {
-                break;
-            }  
+            std::cout << "read: "<<buffer<<std::endl;
+
+            //执行回调
+            _task(buffer, clientfd);
         }
+    }
+
+    void SetTask(task_t task)
+    {
+        _task = task;
     }
 
     void Start()
     {
+        if(_task == nullptr)
+        {
+            LOG(ERROR,"no task");
+            return;
+        }
         _isrunning = true;
         while(_isrunning)
         {
@@ -88,12 +97,10 @@ public:
             }
 
             InetAddr peer(client);
-            LOG(INFO,"new connection from %s:%d",peer.Ip().c_str(),peer.Port());
-            //serverice(clientfd,peer);
-            auto func = std::bind(&TcpServer::serverice,this,clientfd,peer);
-            //ThreadPool::GetInstance()->Equeue(func);
 
-            std::thread t(func);
+            auto func = std::bind(&TcpServer::serverice,this,clientfd,peer);
+
+            std::thread t(func); //创建一个新的线程
             t.detach();
         }
     }
@@ -106,5 +113,6 @@ private:
     int _listensock;
     int _port;
     bool _isrunning;
+    task_t _task;
 };
 

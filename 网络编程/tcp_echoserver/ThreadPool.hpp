@@ -9,8 +9,7 @@
 #include "Thread.hpp"
 #include "Log.hpp"
 #include "Lockguard.hpp"
-#include "Thread.hpp"
-
+#include"Thread.hpp"
 using namespace ThreadMoudle;
 using namespace log_ns;
 

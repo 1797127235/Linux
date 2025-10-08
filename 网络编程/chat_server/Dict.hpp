@@ -2,7 +2,6 @@
 #include<string>
 #include<fstream>
 #include<iostream>
-#include<sstream>
 
 const char sep = ':';
 class Dict
