@@ -1,0 +1,97 @@
+#pragma once
+
+#include"Connection.hpp"
+#include<iostream>
+#include<errno.h>
+#include<sys/types.h>
+
+const size_t buffersize = 512;
+class HandlerConnection
+{
+public:
+    HandlerConnection(handler_t process):
+    _process(process)
+    {
+    }
+    void HandleRecver(Connection* conn)
+    {
+        //非阻塞读取
+        while(true)
+        {
+            errno = 0;
+            char buffer[buffersize];
+            int n = ::recv(conn->Sockfd(),buffer,buffersize - 1,0);
+            if(n > 0)
+            {
+                buffer[n] = 0;
+                conn->AppendInbuffer(buffer);
+            }
+            else
+            {
+                if(errno == EWOULDBLOCK)
+                {
+                    break;
+                }
+                else if(errno == EINTR)
+                {
+                    continue;
+                }
+                else
+                {
+                    conn->_handler_excepter(conn);
+                    return ;
+                }
+            }
+        }
+        std::cout << "Received data: " << conn->Inbuffer() << std::endl;
+        _process(conn);
+    }
+
+    void HandleSender(Connection* conn)
+    {
+        std::cout << "Sending: " << conn->Outbuffer() << std::endl;
+        //一次性发完
+        while(true)
+        {
+            errno = 0;
+            int n = ::send(conn->Sockfd(),conn->Outbuffer().c_str(),conn->Outbuffer().size(),0);
+            if(n > 0)
+            {
+                conn->DiscardOutbuffer(n);
+            }
+            else
+            {
+                if(errno == EWOULDBLOCK)
+                {
+                    break;
+                }
+                else if(errno == EINTR)
+                {
+                    continue;
+                }
+                else
+                {
+                    conn->_handler_excepter(conn);
+                    return ;
+                }
+            }
+        }
+
+        if(!conn->Outbuffer().empty())
+        {
+            conn->_R->EnableConnectionReadWrite(conn->Sockfd(),true,true);
+        }
+        else
+        {
+            conn->_R->EnableConnectionReadWrite(conn->Sockfd(),true,false);
+        }
+
+    }
+
+    void HandleExcepter(Connection* conn)
+    {
+        conn->_R->DelConnection(conn->Sockfd());
+    }
+private:
+    handler_t _process;
+};
