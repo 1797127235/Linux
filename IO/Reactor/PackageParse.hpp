@@ -38,7 +38,11 @@ public:
             conn->AppendOutbuffer(respjson);
         }
 
+        //业务处理不负责发送
+        //conn->_handler_sender(conn);  //直接发送
+
         //设置对写事件关心
+        //从此以后所有的IO都是由Reactor自动处理,多线程只要负责安全处理请求和应答即可
         if (!conn->Outbuffer().empty()) {
             conn->_R->EnableConnectionReadWrite(conn->Sockfd(), true, true); // 方法2：我只要进行对写事件的关心即可
         }

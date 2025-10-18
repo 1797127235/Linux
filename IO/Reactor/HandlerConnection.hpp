@@ -16,9 +16,9 @@ public:
     void HandleRecver(Connection* conn)
     {
         //非阻塞读取
+        errno = 0;
         while(true)
         {
-            errno = 0;
             char buffer[buffersize];
             int n = ::recv(conn->Sockfd(),buffer,buffersize - 1,0);
             if(n > 0)
@@ -49,10 +49,9 @@ public:
     void HandleSender(Connection* conn)
     {
         //一次性发完
+        errno = 0;
         while(true)
         {
-            
-            errno = 0;
             int n = ::send(conn->Sockfd(),conn->Outbuffer().c_str(),conn->Outbuffer().size(),0);
             if(n > 0)
             {

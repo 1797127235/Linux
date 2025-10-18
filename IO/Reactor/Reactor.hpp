@@ -31,7 +31,7 @@ public:
     //删除连接
     void DelConnection(int sockfd)
     {
-        if(!_connections[sockfd])
+        if(!_connections[sockfd]) //防止重复删除
         {
             return ;
         }
