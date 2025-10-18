@@ -43,26 +43,30 @@ public:
                 }
             }
         }
-        std::cout << "Received data: " << conn->Inbuffer() << std::endl;
         _process(conn);
     }
 
     void HandleSender(Connection* conn)
     {
-        std::cout << "Sending: " << conn->Outbuffer() << std::endl;
         //一次性发完
         while(true)
         {
+            if(conn->Outbuffer().empty()) break;
             errno = 0;
             int n = ::send(conn->Sockfd(),conn->Outbuffer().c_str(),conn->Outbuffer().size(),0);
             if(n > 0)
             {
                 conn->DiscardOutbuffer(n);
             }
-            else
+            else if(n == 0)
+            {
+                break;
+            }
+            if(n < 0)
             {
                 if(errno == EWOULDBLOCK)
                 {
+                    //发送条件不满足
                     break;
                 }
                 else if(errno == EINTR)
@@ -77,6 +81,7 @@ public:
             }
         }
 
+        //发现不为空时继续写
         if(!conn->Outbuffer().empty())
         {
             conn->_R->EnableConnectionReadWrite(conn->Sockfd(),true,true);

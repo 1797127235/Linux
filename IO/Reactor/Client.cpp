@@ -26,10 +26,10 @@ int main(int argc, char *argv[])
     srand(time(nullptr) ^ getpid());
     const std::string opers = "+-*/%&^!";
 
-    int cnt = 3;
     std::string packagestreamqueue;
     while (true)
     {
+
         // 构建数据
         int x = rand() % 10;
         usleep(x * 1000);
@@ -84,7 +84,6 @@ int main(int argc, char *argv[])
         }
 
         sleep(1);
-        // break;
     }
 
     sock->Close();

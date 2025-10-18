@@ -62,14 +62,9 @@ namespace socket_ns
                 perror("socket");
                 exit(2);
             }
-            // 只对服务器套接字设置非阻塞
-            if(_is_server) {
-                SetNonBlock(_sockfd);
-            }
         }
         void CreateBindOrDie(uint16_t port) override
         {
-            _is_server = true;  // 标记为服务器套接字
             int opt = 1;
             (void)::setsockopt(_sockfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 
@@ -140,14 +135,6 @@ namespace socket_ns
             return ::send(_sockfd,message.c_str(),message.size(),0);
         }
 
-        // ssize_t Recv(std::string* message) override {
-        //     char buffer[2048];
-        //     ssize_t n = ::recv(_sockfd, buffer, sizeof(buffer), 0);
-        //     if (n < 0) { perror("recvfrom/recv"); std::exit(2); }
-        //     if (n == 0) { message->clear(); return 0; }
-        //     *message+=buffer;
-        //     return n;
-        // }
 
         ssize_t Recv(std::string *out) override
         {

@@ -21,6 +21,7 @@ public:
             throw std::runtime_error("epoll_create1 error");
         }
 
+
         //添加监听文件描述符
         struct epoll_event ev;
         ev.events = EPOLLIN;
@@ -67,9 +68,11 @@ public:
             int n = ::recv(fd, buf, sizeof(buf) - 1, 0); // 用 recv，保留 flags
             if (n == 0)
             {
-                int ret = ::epoll_ctl(_epollfd, EPOLL_CTL_DEL, fd, nullptr);
+                //移除的必须是合法的不然报错
+                int ret = ::epoll_ctl(_epollfd, EPOLL_CTL_DEL, fd, nullptr); 
                 if (ret == -1)
                     throw std::runtime_error("epoll_ctl error (DEL on close)");
+
                 _clients.erase(fd); // 移除 shared_ptr，自动关闭 socket
                 return;
             }
