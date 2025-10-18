@@ -38,7 +38,6 @@ public:
             conn->AppendOutbuffer(respjson);
         }
 
-
         //设置对写事件关心
         if (!conn->Outbuffer().empty()) {
             conn->_R->EnableConnectionReadWrite(conn->Sockfd(), true, true); // 方法2：我只要进行对写事件的关心即可

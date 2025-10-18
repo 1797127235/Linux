@@ -77,13 +77,18 @@ public:
     {
         _outbuffer.erase(0, n);
     }
+    
     void Close()
     {
         if(_sockfd >= 0)
             ::close(_sockfd);
+        _sockfd = -1;
+        _inbuffer.clear();
+        _outbuffer.clear();
     }
     ~Connection()
     {
+        Close();
     }
 
 private:

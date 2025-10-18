@@ -52,7 +52,6 @@ public:
     //添加连接
     void AddConnection(int sockfd,uint32_t events,const InetAddr& addr,int type)
     {
-        std::cout << "AddConnection: sockfd=" << sockfd << " type=" << type << std::endl;
         Connection* conn = new Connection(sockfd);
         conn->SetEvents(events);
         conn->SetAddr(addr);
@@ -61,23 +60,19 @@ public:
         
         if(conn->Type() == ListenConnection)
         {
-            std::cout << "Registering as ListenConnection" << std::endl;
             conn->RegisterHandler(_OnConnect,nullptr,nullptr);
         }
         else
         {
-            std::cout << "Registering as NormalConnection" << std::endl;
             conn->RegisterHandler(_OnRecverl,_OnSender,_OnExcepter);
         }
 
         //将连接写入内核
         if(!_epoller->AddEvent(sockfd,events))
         {
-            std::cout << "Failed to add event to epoll" << std::endl;
             delete conn;
             return;
         }
-        std::cout << "Connection added successfully" << std::endl;
         _connections.insert(std::make_pair(sockfd,conn));
     }
 
@@ -101,13 +96,6 @@ public:
             int sockfd = _events[i].data.fd;
             uint32_t events = _events[i].events;
             
-            std::cout << "Event on sockfd " << sockfd << ": ";
-            if(events & EPOLLIN) std::cout << "EPOLLIN ";
-            if(events & EPOLLOUT) std::cout << "EPOLLOUT ";
-            if(events & EPOLLERR) std::cout << "EPOLLERR ";
-            if(events & EPOLLHUP) std::cout << "EPOLLHUP ";
-            std::cout << std::endl;
-
             if (events & EPOLLERR)
                 events |= (EPOLLIN | EPOLLOUT);
             if (events & EPOLLHUP)
@@ -150,16 +138,11 @@ private:
     bool _isrunning = false;
     struct epoll_event _events[1024];
 
-
     //Reactor中处理socket的方法集合
-
     //处理新连接
     handler_t _OnConnect;
-
     //处理普通socket
-
     handler_t _OnRecverl;
     handler_t _OnSender;
     handler_t _OnExcepter;
-
 };

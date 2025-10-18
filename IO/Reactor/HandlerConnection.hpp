@@ -51,14 +51,18 @@ public:
         //一次性发完
         while(true)
         {
-            if(conn->Outbuffer().empty()) break;
+            
             errno = 0;
             int n = ::send(conn->Sockfd(),conn->Outbuffer().c_str(),conn->Outbuffer().size(),0);
             if(n > 0)
             {
                 conn->DiscardOutbuffer(n);
+                if(conn->Outbuffer().empty())
+                {
+                    break;
+                }
             }
-            else if(n == 0)
+            else if(n == 0) //发送完了
             {
                 break;
             }
